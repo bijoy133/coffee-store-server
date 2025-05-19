@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config()
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+
 const app = express();
 const port= process.env.PORT || 3000;
 
@@ -75,6 +76,11 @@ async function run() {
 
 
 // User ralated APIs
+ app.get('/users',async(req,res)=>{
+  const result =await usersCollection.find().toArray();
+  res.send(result)
+ })
+
 
 app.post('/users',async(req,res)=>{
   const useProfile = req.body;
@@ -82,7 +88,25 @@ app.post('/users',async(req,res)=>{
   const result =await usersCollection.insertOne(useProfile);
   res.send(result)
 })
+app.patch('/users',async(req,res)=>{
+  const {email,lastSignInTime}=req.body;
+  const filter = {email:email};
+  const updateDoc={
+    $set:{
+           lastSignInTime:lastSignInTime
+    }
+    
+  }
+  const result = await usersCollection.updateOne(filter,updateDoc);
+  res.send(result)
+})
   
+app.delete('/users/:id',async(req,res)=>{
+    const id = req.params.id;
+    const query = {_id: new ObjectId(id)}
+    const result = await usersCollection.deleteOne(query);
+    res.send(result)
+})
 
 
     // Send a ping to confirm a successful connection
